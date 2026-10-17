@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Habits">
 <title>Daily habit companion</title>
 <style>
 :root{--bg:#eef3f2;--ink:#1d2b36;--mute:#566872;--line:#c9d6d6;--acc:#1f8a8a;--accink:#fff;--warm:#d9772b;--panel:#f8fbfa;
@@ -19,27 +21,30 @@ main{max-width:560px;margin:0 auto;padding:28px 20px 40px;position:relative;z-in
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
 .mascot{width:58px;height:68px;fill:var(--ink);flex:none}
 .foot{text-align:center;padding-top:8px}.foot svg{width:150px;height:80px;fill:var(--ink);opacity:.6}
-@media (prefers-reduced-motion:no-preference){.w{animation:drift 16s ease-in-out infinite alternate}@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-34px)}}}
 h1{font:600 1.5rem/1.2 Georgia,"Times New Roman",serif;margin:0 0 4px}
-h2{font:600 1.05rem/1.3 system-ui,sans-serif;margin:0 0 10px}
+h2,summary{font:600 1.05rem/1.3 system-ui,sans-serif;margin:0 0 10px}
 p{margin:0 0 10px}.mute{color:var(--mute);font-size:.92rem}
-section{padding:26px 0;border-top:1px solid var(--line)}
+section,details{padding:24px 0;border-top:1px solid var(--line)}
+details{padding:14px 0}summary{cursor:pointer;min-height:44px;display:flex;align-items:center;margin:0}
+details[open] summary{margin-bottom:8px}
 button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:10px 16px;min-height:44px}
 button.go{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:600}
-button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
+button.del{color:var(--warm);border-color:var(--warm)}
+button:focus-visible,textarea:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
 .tabs{display:flex;gap:8px;margin:16px 0 0}.tabs button{flex:1}
 .tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sum{padding:22px 0 8px}
 .q{font:italic 1.55rem/1.3 Georgia,"Times New Roman",serif;margin:14px 0 18px;min-height:3.9em}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.dots{display:flex;gap:5px;margin:10px 0}.dots i{width:18px;height:18px;border-radius:50%;border:2px solid var(--line)}
+.dots{display:flex;gap:5px;margin:12px 0 4px}.dots i{width:18px;height:18px;border-radius:50%;border:2px solid var(--line)}
 .dots i.on{background:var(--acc);border-color:var(--acc)}.dots i.today{outline:2px solid var(--warm);outline-offset:2px}
 .clock{font:600 3.2rem/1 Georgia,serif;font-variant-numeric:tabular-nums;margin:6px 0 14px}
 textarea{width:100%;min-height:84px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;padding:10px;margin:8px 0}
 input[type=number]{width:72px;font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .warn{border-left:4px solid var(--warm);padding:8px 12px;background:var(--panel);margin:0 0 12px;border-radius:0 8px 8px 0}
-.stat{font:600 1.9rem/1 Georgia,serif}
+.stat{font:600 2.4rem/1 Georgia,serif}.stat.sm{font-size:1.6rem}
 .hi{padding:9px 0;border-bottom:1px solid var(--line)}.hi b{font-weight:600;font-size:.92rem}.hi div{white-space:pre-wrap;overflow-wrap:anywhere}
-@media (prefers-reduced-motion:no-preference){.q{transition:opacity .25s}.q.f{opacity:0}}
+@media (prefers-reduced-motion:no-preference){.q{transition:opacity .25s}.q.f{opacity:0}.w{animation:drift 16s ease-in-out infinite alternate}@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-34px)}}}
 </style>
 </head>
 <body>
@@ -61,8 +66,7 @@ input[type=number]{width:72px;font:inherit;padding:8px;border-radius:8px;border:
 <svg viewBox="0 0 150 80" style="right:2vw;bottom:0;width:250px;height:133px;opacity:.09"><use href="#sleep"/></svg>
 </div>
 <main>
-<header class="top"><div><h1>Daily habit companion</h1>
-<p class="mute" id="date"></p></div>
+<header class="top"><div><h1>Daily habit companion</h1><p class="mute" id="date"></p></div>
 <svg class="mascot" viewBox="0 0 120 140" aria-hidden="true"><use href="#sit"/></svg></header>
 <div class="tabs" role="group" aria-label="Choose habit">
 <button id="tm" aria-pressed="true">Meditate</button>
@@ -95,24 +99,34 @@ input[type=number]{width:72px;font:inherit;padding:8px;border-radius:8px;border:
 <section aria-labelledby="h-check">
 <h2 id="h-check">Check in</h2>
 <div id="warn"></div>
-<div class="row" style="gap:22px;margin-bottom:6px">
+<div class="sum" style="padding:4px 0 14px">
+<div class="row" style="gap:28px;align-items:flex-end">
 <div><div class="stat" id="streak">0</div><div class="mute">day streak</div></div>
-<div><div class="stat" id="total">0</div><div class="mute">days done</div></div>
+<div><div class="stat sm" id="total">0</div><div class="mute">days done</div></div>
+<div><div class="stat sm" id="week">0/7</div><div class="mute">this week</div></div>
 </div>
 <div class="dots" id="dots" aria-label="Last 14 days"></div>
+</div>
 <label for="note" id="notelbl">What did I notice?</label>
 <textarea id="note" placeholder="One sentence is enough."></textarea>
 <button class="go" id="done">I did it today</button>
 <p class="mute" id="msg" aria-live="polite" style="margin-top:10px"></p>
+<button id="viewp" aria-expanded="false">View previous notes</button>
+<div id="histwrap" hidden style="margin-top:12px"><div id="hist"></div></div>
 </section>
 
-<section aria-labelledby="h-hist">
-<h2 id="h-hist">Past notes</h2>
-<div id="hist"></div>
-<div class="row" style="margin-top:12px"><button id="copy">Copy all notes</button></div>
-<textarea id="exp" readonly hidden aria-label="All notes" style="min-height:160px"></textarea>
-<p class="mute" id="cmsg" aria-live="polite"></p>
-</section>
+<details><summary>Your data and backup</summary>
+<p class="mute">Everything is saved only in this browser, on this device. The Home Screen icon and Safari keep separate copies. Clearing website data erases it, so copy a backup now and then.</p>
+<div class="row">
+<button class="go" id="cbk">Copy backup</button>
+<button id="ctx">Copy notes as text</button>
+</div>
+<textarea id="exp" readonly hidden aria-label="Text to copy" style="min-height:140px"></textarea>
+<label for="imp" style="display:block;margin-top:14px">Restore from a backup</label>
+<textarea id="imp" placeholder="Paste the backup text here, then tap Restore."></textarea>
+<div class="row"><button id="rst">Restore</button><button class="del" id="wipe">Erase everything</button></div>
+<p class="mute" id="dmsg" aria-live="polite" style="margin-top:10px"></p>
+</details>
 
 <section>
 <h2>Build up slowly</h2>
@@ -122,18 +136,24 @@ input[type=number]{width:72px;font:inherit;padding:8px;border-radius:8px;border:
 </main>
 <script>
 const H={m:{name:"meditation",def:10,lbl:"What did I notice?",
-steps:["Sit down at your usual spot. Cushion or chair is already in view.","Take one slow breath, longer out than in.","Say it: \u201cI\u2019m someone who gives my mind a daily reset.\u201d","Pick a question to hold while you sit:","Start the 2-minute version. You can stop after that, or keep going."],
+steps:["Sit down at your usual spot. Cushion or chair is already in view.","Take one slow breath, longer out than in.","Say it: \u201cI\u2019m someone who gives my mind a daily reset.\u201d","Pick a question to hold while you sit:","Start your timer and sit for your full session."],
 q:["What will my mind do in the first minute today?","Where do I feel my breath most clearly right now?","What is one sound in this room I haven\u2019t noticed yet?","What does restlessness actually feel like in my body?","What changes between my first breath and my tenth?"]},
 j:{name:"journaling",def:30,lbl:"What did I write about, or notice?",
-steps:["Sit down at your usual spot. Notebook is open, pen on top.","Take one slow breath. Look at one ordinary object and find three details you hadn\u2019t noticed.","Say it: \u201cI\u2019m someone who thinks on paper every day.\u201d","Pick a question to write about:","Write one sentence now. Keep going if it flows."],
+steps:["Sit down at your usual spot. Notebook is open, pen on top.","Take one slow breath. Look at one ordinary object and find three details you hadn\u2019t noticed.","Say it: \u201cI\u2019m someone who thinks on paper every day.\u201d","Pick a question to write about:","Start your timer and write until it ends. One sentence is a fine start."],
 q:["What surprised me yesterday?","What is one thing I don\u2019t understand about yesterday?","What am I curious about right now?","What would I write if nobody would ever read this?","What did I learn this week that I haven\u2019t said out loud?"]}};
+H.m.q.push(...["What is the very first thing I notice in my body right now?", "Where is there tension I hadn’t registered?", "What does the air feel like as it enters my nose?", "Which part of my breath is the hardest to follow?", "What is the quietest sound I can hear?", "How does the weight of my body feel against the seat?", "What does the space between two breaths feel like?", "Where do my thoughts seem to come from?", "What is my mind most drawn to today?", "How long can I stay with one single breath?", "What does it feel like when I notice I have wandered?", "What temperature is my left hand, and my right?", "What happens to a thought if I just watch it and do nothing?", "What is happening in my jaw and face right now?", "How does my belly move when I breathe naturally?", "Which sensation is strongest right now, and does it stay the same?", "What does the inside of my eyelids look like?", "How does stillness feel different from sleepiness?", "What am I rushing toward, and can it wait ten minutes?", "What would it feel like to need nothing right now?", "Where in my body do I feel my pulse?", "What is the texture of the silence in this room?", "How do my shoulders respond to one long exhale?", "What emotion is quietly in the background, and where do I feel it?", "What is it like to breathe without trying to improve the breath?", "How many different sounds can I count without moving?", "What changes if I soften my gaze or my forehead?", "What does my breath do when I stop watching it so closely?", "Where does my attention go when I am not directing it?", "What does comfort feel like in my hands?", "How does my body feel at the top of an inhale?", "What is the first thought that arrives, and is it new or familiar?", "What does patience feel like in the body?", "Can I feel the air on my skin, and where is it strongest?", "What if this session did not need to feel any particular way?", "What small thing did my body do today that I took for granted?", "What does it feel like to be here instead of planning?", "Which thoughts keep returning, and what are they asking for?", "How does my chest feel on the way out?", "What is the difference between hearing a sound and naming it?", "Where is the edge of my attention right now?", "What does gratitude feel like as a sensation, not an idea?", "How does my attention feel when it is gently held, not gripped?", "What is moving in me that I can’t see?", "What would a kind observer notice about how I am sitting?", "What does it feel like when a thought fades by itself?", "How much effort is really needed to stay with the breath?", "What is the most ordinary sensation here, and can it be interesting?", "What do I notice at the very end of the exhale?", "What am I curious about in this moment, with no answer needed?"]);
+H.j.q.push(...["What is one small thing that made me smile recently?", "What did I avoid yesterday, and what was I afraid of?", "What would I tell a friend in my situation?", "What is taking up the most space in my mind right now?", "What did I do this week that I am quietly proud of?", "What would make tomorrow feel like a good day?", "What am I grateful for that I usually overlook?", "What question am I carrying that I haven’t asked anyone?", "When did I feel most like myself recently?", "What is one belief about myself that I would like to test?", "What is a mistake from this week, and what did it teach me?", "What am I looking forward to, even a little?", "What do I need more of right now, and less of?", "Who made a difference to me recently, and how?", "What did I learn today that surprised me?", "What would I do this week if I were not worried about the result?", "What is one thing I can do in five minutes that would help future me?", "Where did my energy go today?", "What am I pretending not to know?", "What did I used to find hard that now feels easier?", "What would a calmer version of me do next?", "What do I want to remember about this period of my life?", "What have I been postponing, and what is the smallest first step?", "What is a compliment I received and brushed off?", "What would I like to be curious about this month?", "How did I react when something went wrong this week?", "What does a good day look like for me, in specific detail?", "What is one thing I do that I would like to do more often?", "What am I holding onto that I could put down?", "What was the best part of my day, and why?", "Whose opinion am I worrying about, and does it matter?", "What would I try if I knew I could improve step by step?", "What was a moment of kindness I gave or received?", "What is one thing I understand better than a year ago?", "What does my body need today?", "What is a difficult conversation I have been avoiding?", "If I could ask my future self one question, what would it be?", "What is one habit that is helping me, and one that is not?", "What made me feel capable today?", "What would I like to forgive myself for?", "What are three things I noticed on my way here today?", "What do I want more of in my work or studies?", "What is a challenge I’m facing that might also be an opportunity?", "What am I learning about how I learn?", "What is something I have changed my mind about lately?", "What is a place that makes me feel calm, and why?", "Which small win from this week deserves to be celebrated?", "What is one thing I can let be good enough?", "What would I like to have more courage for?", "What is the next small step toward something that matters to me?"]);
 const $=id=>document.getElementById(id);
 let h="m",step=-1,qi=0,mem={},tid=null,left=0,endAt=0,run=false;
 function load(){try{const s=localStorage.getItem("hc1");return s?JSON.parse(s):{}}catch(e){return mem}}
 function save(d){mem=d;try{localStorage.setItem("hc1",JSON.stringify(d))}catch(e){}}
+function getB(){try{return+localStorage.getItem("hc1b")||0}catch(e){return 0}}
+function setB(){try{localStorage.setItem("hc1b",String(Date.now()))}catch(e){}}
 const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const ago=n=>{const d=new Date();d.setDate(d.getDate()-n);return key(d)};
-function days(){const d=load();return d[h]||{}}
+const days=()=>load()[h]||{};
+const count=d=>Object.keys(d.m||{}).length+Object.keys(d.j||{}).length;
+const getMins=()=>Math.min(90,Math.max(1,parseInt($("mins").value)||H[h].def));
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 function setTab(x){h=x;$("tm").setAttribute("aria-pressed",x==="m");$("tj").setAttribute("aria-pressed",x==="j");
 step=-1;resetTimer();$("mins").value=H[x].def;$("clock").textContent=fmt(H[x].def*60);$("notelbl").textContent=H[x].lbl;$("msg").textContent="";renderStep();renderStats()}
@@ -141,41 +161,56 @@ function renderStep(){const s=H[h].steps;
 if(step<0){$("stepno").textContent="Takes about 90 seconds. Do it right before you start.";$("steptxt").textContent="Go through five small steps so the habit starts with a clear cue and a question to hold.";$("q").hidden=true;$("more").hidden=true;$("next").textContent="Start";return}
 $("stepno").textContent="Step "+(step+1)+" of "+s.length;$("steptxt").textContent=s[step];
 const isq=step===3;$("q").hidden=!isq;$("more").hidden=!isq;if(isq)$("q").textContent=H[h].q[qi%H[h].q.length];
-$("next").textContent=step===s.length-1?"Begin the timer":"Next"}
+$("next").textContent=step===s.length-1?"Start the "+getMins()+"-minute timer":"Next"}
 $("next").onclick=()=>{const n=H[h].steps.length;
 if(step<0){step=0;qi=Math.floor(Math.random()*H[h].q.length)}
-else if(step===n-1){step=-1;renderStep();startTimer(2);return}
+else if(step===n-1){step=-1;renderStep();startTimer(getMins());return}
 else step++;renderStep()};
 $("more").onclick=()=>{const q=$("q");q.classList.add("f");setTimeout(()=>{qi++;q.textContent=H[h].q[qi%H[h].q.length];q.classList.remove("f")},200)};
-function beep(){try{const a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=528;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.001,a.currentTime);g.gain.exponentialRampToValueAtTime(.25,a.currentTime+.05);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+2.2);o.start();o.stop(a.currentTime+2.3)}catch(e){}}
+function beep(){try{const a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=528;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.001,a.currentTime);g.gain.exponentialRampToValueAtTime(.25,a.currentTime+.05);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+2.2);o.start();o.stop(a.currentTime+2.3)}catch(e){}}
 function tick(){left=Math.max(0,Math.round((endAt-Date.now())/1000));$("clock").textContent=fmt(left);
 if(left<=0){clearInterval(tid);run=false;$("start").textContent="Start";beep();$("msg").textContent="Time. Take a breath and notice how you feel, then check in below."}}
 function startTimer(m){clearInterval(tid);left=m*60;endAt=Date.now()+left*1000;run=true;$("start").textContent="Pause";$("msg").textContent="";tid=setInterval(tick,250);tick()}
 function resetTimer(){clearInterval(tid);run=false;$("start").textContent="Start"}
 $("start").onclick=()=>{if(run){clearInterval(tid);run=false;left=Math.max(0,Math.round((endAt-Date.now())/1000));$("start").textContent="Resume";return}
 if(left>0&&$("start").textContent==="Resume"){endAt=Date.now()+left*1000;run=true;$("start").textContent="Pause";tid=setInterval(tick,250);return}
-const m=Math.min(90,Math.max(1,parseInt($("mins").value)||H[h].def));startTimer(m)};
+startTimer(Math.min(90,Math.max(1,parseInt($("mins").value)||H[h].def)))};
 $("two").onclick=()=>startTimer(2);
-$("reset").onclick=()=>{resetTimer();const m=parseInt($("mins").value)||H[h].def;left=0;$("clock").textContent=fmt(m*60)};
+$("reset").onclick=()=>{resetTimer();left=0;$("clock").textContent=fmt((parseInt($("mins").value)||H[h].def)*60)};
 $("mins").onchange=()=>{if(!run){$("start").textContent="Start";left=0;$("clock").textContent=fmt((parseInt($("mins").value)||H[h].def)*60)}};
-function renderStats(){const D=days();let n=0,st=0;for(const k in D)n++;
+function renderStats(){const D=days();let n=Object.keys(D).length,st=0,wk=0;
 let i=D[ago(0)]?0:1;while(D[ago(i)]){st++;i++}
-$("streak").textContent=st;$("total").textContent=n;
+for(let j=0;j<7;j++)if(D[ago(j)])wk++;
+$("streak").textContent=st;$("total").textContent=n;$("week").textContent=wk+"/7";
 const dots=$("dots");dots.innerHTML="";for(let j=13;j>=0;j--){const e=document.createElement("i");if(D[ago(j)])e.className="on";if(j===0)e.classList.add("today");e.title=ago(j);dots.appendChild(e)}
 const w=$("warn");w.innerHTML="";
-if(!D[ago(0)]&&!D[ago(1)]&&D[ago(2)]){w.innerHTML='<div class="warn">You missed yesterday. Never miss twice: do the 2-minute version today.</div>'}
+if(!D[ago(0)]&&!D[ago(1)]&&D[ago(2)])w.innerHTML='<div class="warn">You missed yesterday. Never miss twice: do the 2-minute version today.</div>';
+const b=getB();if(count(load())>=3&&(!b||Date.now()-b>14*864e5))w.innerHTML+='<div class="warn">Tip: copy a backup (under \u201cYour data and backup\u201d) so your notes survive if browser data is cleared.</div>';
 $("note").value=D[ago(0)]?D[ago(0)].note||"":"";
 $("done").textContent=D[ago(0)]?"Update today\u2019s note":"I did it today";renderHistory()}
-$("done").onclick=()=>{const d=load();d[h]=d[h]||{};const was=!!d[h][ago(0)];d[h][ago(0)]={note:$("note").value.trim().slice(0,500)};save(d);renderStats();
+function renderHistory(){const el=$("hist");el.innerHTML="";const d=load(),all=[];
+for(const x of["m","j"])for(const k in d[x]||{})all.push({k,x,n:d[x][k].note||"",t:d[x][k].t});
+all.sort((a,b)=>a.k<b.k?1:a.k>b.k?-1:(b.t||0)-(a.t||0));
+if(!all.length){el.textContent="No entries yet.";el.className="mute";return}
+el.className="";all.forEach(e=>{const r=document.createElement("div");r.className="hi";const b=document.createElement("b");
+const dt=e.t?new Date(e.t):new Date(e.k+"T12:00:00");
+b.textContent=dt.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"})+(e.t?", "+dt.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"")+" \u00b7 "+H[e.x].name;
+const p=document.createElement("div");p.textContent=e.n||"(no note)";if(!e.n)p.className="mute";const del=document.createElement("button");del.textContent="Delete";del.className="del";del.style.cssText="min-height:36px;padding:4px 12px;margin-top:6px";del.onclick=()=>{if(confirm("Delete this entry?")){const d2=load();if(d2[e.x]){delete d2[e.x][e.k];save(d2);renderStats()}}};r.append(b,p,del);el.appendChild(r)})}
+$("done").onclick=()=>{const d=load();d[h]=d[h]||{};const was=!!d[h][ago(0)];d[h][ago(0)]={note:$("note").value.trim().slice(0,500),t:Date.now()};save(d);renderStats();
 $("msg").textContent=was?"Note updated.":"Done. That\u2019s a vote for the person you\u2019re becoming. Enjoy the small win."};
-function renderHistory(){const D=days(),el=$("hist");el.innerHTML="";const ks=Object.keys(D).sort().reverse();
-if(!ks.length){el.textContent="No entries yet.";el.className="mute";return}
-el.className="";ks.forEach(k=>{const r=document.createElement("div");r.className="hi";const b=document.createElement("b");b.textContent=k;const p=document.createElement("div");p.textContent=D[k].note||"(no note)";if(!D[k].note)p.className="mute";r.append(b,p);el.appendChild(r)})}
-$("copy").onclick=async()=>{const d=load();let t="";for(const x of ["m","j"]){const D=d[x]||{};const ks=Object.keys(D).sort();if(!ks.length)continue;t+=H[x].name.toUpperCase()+"\n";ks.forEach(k=>{t+=k+": "+(D[k].note||"(no note)")+"\n"});t+="\n"}
-t=t.trim();if(!t){$("cmsg").textContent="Nothing to copy yet.";return}
-const ta=$("exp");ta.value=t;
-try{await navigator.clipboard.writeText(t);ta.hidden=true;$("cmsg").textContent="Copied. Paste it into a chat or a note."}
-catch(e){ta.hidden=false;ta.focus();ta.select();$("cmsg").textContent="Couldn\u2019t copy automatically. The text is selected below: use Copy from the menu."}};
+async function copyTxt(t){const ta=$("exp");ta.value=t;try{await navigator.clipboard.writeText(t);ta.hidden=true;return true}catch(e){ta.hidden=false;ta.focus();ta.select();return false}}
+const fail="Couldn\u2019t copy automatically. The text is selected below: copy it from the menu.";
+$("cbk").onclick=async()=>{const d=load();if(!count(d)){$("dmsg").textContent="Nothing to back up yet.";return}
+const ok=await copyTxt(JSON.stringify(d));setB();$("dmsg").textContent=ok?"Backup copied. Paste it into a note or a message to yourself.":fail;renderStats()};
+$("ctx").onclick=async()=>{const d=load();let t="";for(const x of["m","j"]){const D=d[x]||{};const ks=Object.keys(D).sort();if(!ks.length)continue;t+=H[x].name.toUpperCase()+"\n";ks.forEach(k=>{t+=k+(D[k].t?" "+new Date(D[k].t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"")+": "+(D[k].note||"(no note)")+"\n"});t+="\n"}
+t=t.trim();if(!t){$("dmsg").textContent="Nothing to copy yet.";return}
+const ok=await copyTxt(t);$("dmsg").textContent=ok?"Notes copied.":fail};
+$("rst").onclick=()=>{let src;try{src=JSON.parse($("imp").value.trim())}catch(e){$("dmsg").textContent="That doesn\u2019t look like a backup. Paste the whole text from \u201cCopy backup\u201d.";return}
+const d=load();let n=0;for(const x of["m","j"]){const S=src&&src[x];if(!S||typeof S!=="object")continue;d[x]=d[x]||{};
+for(const k in S){if(/^\d{4}-\d{2}-\d{2}$/.test(k)&&S[k]&&typeof S[k]==="object"){d[x][k]={note:String(S[k].note||"").slice(0,500),t:typeof S[k].t==="number"?S[k].t:undefined};n++}}}
+save(d);$("imp").value="";$("dmsg").textContent=n?"Restored "+n+" entries.":"No entries found in that text.";renderStats()};
+$("wipe").onclick=()=>{if(confirm("Erase all notes and streaks on this device? This can\u2019t be undone.")){save({});$("dmsg").textContent="Everything erased.";renderStats()}};
+$("viewp").onclick=()=>{const w=$("histwrap"),o=w.hidden;w.hidden=!o;$("viewp").setAttribute("aria-expanded",o);$("viewp").textContent=o?"Hide previous notes":"View previous notes";if(o)renderHistory()};
 $("tm").onclick=()=>setTab("m");$("tj").onclick=()=>setTab("j");
 $("date").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
 mem=load();setTab("m");
