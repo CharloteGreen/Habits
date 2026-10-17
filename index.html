@@ -38,6 +38,7 @@ textarea{width:100%;min-height:84px;border-radius:8px;border:1px solid var(--lin
 input[type=number]{width:72px;font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .warn{border-left:4px solid var(--warm);padding:8px 12px;background:var(--panel);margin:0 0 12px;border-radius:0 8px 8px 0}
 .stat{font:600 1.9rem/1 Georgia,serif}
+.hi{padding:9px 0;border-bottom:1px solid var(--line)}.hi b{font-weight:600;font-size:.92rem}.hi div{white-space:pre-wrap;overflow-wrap:anywhere}
 @media (prefers-reduced-motion:no-preference){.q{transition:opacity .25s}.q.f{opacity:0}}
 </style>
 </head>
@@ -105,6 +106,14 @@ input[type=number]{width:72px;font:inherit;padding:8px;border-radius:8px;border:
 <p class="mute" id="msg" aria-live="polite" style="margin-top:10px"></p>
 </section>
 
+<section aria-labelledby="h-hist">
+<h2 id="h-hist">Past notes</h2>
+<div id="hist"></div>
+<div class="row" style="margin-top:12px"><button id="copy">Copy all notes</button></div>
+<textarea id="exp" readonly hidden aria-label="All notes" style="min-height:160px"></textarea>
+<p class="mute" id="cmsg" aria-live="polite"></p>
+</section>
+
 <section>
 <h2>Build up slowly</h2>
 <p class="mute">Week 1: 2–5 minutes. Weeks 2–3: about half your target. Week 4 on: full length. Missing one day is fine. Never miss twice.</p>
@@ -156,9 +165,17 @@ const dots=$("dots");dots.innerHTML="";for(let j=13;j>=0;j--){const e=document.c
 const w=$("warn");w.innerHTML="";
 if(!D[ago(0)]&&!D[ago(1)]&&D[ago(2)]){w.innerHTML='<div class="warn">You missed yesterday. Never miss twice: do the 2-minute version today.</div>'}
 $("note").value=D[ago(0)]?D[ago(0)].note||"":"";
-$("done").textContent=D[ago(0)]?"Update today\u2019s note":"I did it today"}
+$("done").textContent=D[ago(0)]?"Update today\u2019s note":"I did it today";renderHistory()}
 $("done").onclick=()=>{const d=load();d[h]=d[h]||{};const was=!!d[h][ago(0)];d[h][ago(0)]={note:$("note").value.trim().slice(0,500)};save(d);renderStats();
 $("msg").textContent=was?"Note updated.":"Done. That\u2019s a vote for the person you\u2019re becoming. Enjoy the small win."};
+function renderHistory(){const D=days(),el=$("hist");el.innerHTML="";const ks=Object.keys(D).sort().reverse();
+if(!ks.length){el.textContent="No entries yet.";el.className="mute";return}
+el.className="";ks.forEach(k=>{const r=document.createElement("div");r.className="hi";const b=document.createElement("b");b.textContent=k;const p=document.createElement("div");p.textContent=D[k].note||"(no note)";if(!D[k].note)p.className="mute";r.append(b,p);el.appendChild(r)})}
+$("copy").onclick=async()=>{const d=load();let t="";for(const x of ["m","j"]){const D=d[x]||{};const ks=Object.keys(D).sort();if(!ks.length)continue;t+=H[x].name.toUpperCase()+"\n";ks.forEach(k=>{t+=k+": "+(D[k].note||"(no note)")+"\n"});t+="\n"}
+t=t.trim();if(!t){$("cmsg").textContent="Nothing to copy yet.";return}
+const ta=$("exp");ta.value=t;
+try{await navigator.clipboard.writeText(t);ta.hidden=true;$("cmsg").textContent="Copied. Paste it into a chat or a note."}
+catch(e){ta.hidden=false;ta.focus();ta.select();$("cmsg").textContent="Couldn\u2019t copy automatically. The text is selected below: use Copy from the menu."}};
 $("tm").onclick=()=>setTab("m");$("tj").onclick=()=>setTab("j");
 $("date").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
 mem=load();setTab("m");
