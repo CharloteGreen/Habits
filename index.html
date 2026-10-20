@@ -181,7 +181,7 @@ $("reset").onclick=()=>{resetTimer();left=0;$("clock").textContent=fmt((parseInt
 $("mins").onchange=()=>{if(!run){$("start").textContent="Start";left=0;$("clock").textContent=fmt((parseInt($("mins").value)||H[h].def)*60)}};
 function renderStats(){const D=days();let n=Object.keys(D).length,st=0,wk=0;
 let i=D[ago(0)]?0:1;while(D[ago(i)]){st++;i++}
-for(let j=0;j<7;j++)if(D[ago(j)])wk++;
+const dow=(new Date().getDay()+6)%7;for(let j=0;j<=dow;j++)if(D[ago(j)])wk++;
 $("total").textContent=n;$("week").textContent=wk+"/7";
 const dots=$("dots");dots.innerHTML="";for(let j=13;j>=0;j--){const e=document.createElement("i");if(D[ago(j)])e.className="on";if(j===0)e.classList.add("today");e.title=ago(j);dots.appendChild(e)}
 const w=$("warn");w.innerHTML="";
